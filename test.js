@@ -13,6 +13,7 @@ it ('- GET to root URI',function(done){
 	api()
 		.get('/')
 		.expectStatus(200)
+		.expectBody('{"message":"Hi! welcome to LMS API REST!"}')
 		.end(function(err, res, body) {
 			if (err) throw err;
 			done();

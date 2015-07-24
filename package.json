@@ -12,15 +12,15 @@
     "author": "Gerard CL <gerard.castillo@i2cat.net>",
     "license": "GPL",
     "dependencies": {
-        "express": "~4.0.0",
-        "morgan": "~1.0.0",
-        "mongoose": "~3.6.13",
-        "body-parser": "~1.0.1",
-        "json-socket": "*"
+        "express": "4.0.0",
+        "morgan": "1.0.0",
+        "mongoose": "3.6.13",
+        "body-parser": "1.0.1",
+        "json-socket": "0.1.2"
     },
     "devDependencies": {
         "mocha": "0.10.1",
-        "chai": "*",
-        "hippie": "*"
+        "chai": "3.2.0",
+        "hippie": "0.3.0"
     }
 }
