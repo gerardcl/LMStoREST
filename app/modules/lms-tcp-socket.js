@@ -58,7 +58,7 @@ JsonSocket.prototype = {
     },
     _handleData: function(data) {
         this._buffer += data;
-        console.log('incoming message from LMS: '+this._buffer);
+        console.log('Incoming response from LMS: '+this._buffer);
         this._handleMessage(this._buffer);
     },
     _handleMessage: function(data) {

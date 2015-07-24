@@ -26,25 +26,26 @@ mongoose.connect('mongodb://localhost:27017/lms-middleware');
 var Pipe     = require('./app/models/pipe');
 var Path     = require('./app/models/path');
 var Filter     = require('./app/models/filter');
+console.log('Cleaning DB');
 Filter.remove(function(err, p){
     if(err){ 
         throw err;
     } else{
-        console.log('No Of Documents deleted:' + p);
+        console.log(p+' filters cleaned');
     }
 });
 Path.remove(function(err, p){
     if(err){ 
         throw err;
     } else{
-        console.log('No Of Documents deleted:' + p);
+        console.log(p+' paths cleaned');
     }
 });
 Pipe.remove(function(err, p){
     if(err){ 
         throw err;
     } else{
-        console.log('No Of Documents deleted:' + p);
+        console.log(p+' pipes cleaned');
     }
 });
 
@@ -231,3 +232,4 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('LMS API REST listening on port ' + port);
+console.log('LMS API REST connecting to LMS host '+socketHost+' at port ' + socketPort);

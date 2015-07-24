@@ -1,6 +1,8 @@
 var expect = require('chai').expect;
 var hippie = require('hippie');
 
+console.log("NOTE: Remember running the app before executing tests over it (i.e.: npm start)")
+
 function api() {
   return hippie()
     .json()
