@@ -19,7 +19,7 @@
         "json-socket": "0.1.2"
     },
     "devDependencies": {
-        "mocha": "0.10.1",
+        "mocha": "2.2.5",
         "chai": "3.2.0",
         "hippie": "0.3.0"
     }
