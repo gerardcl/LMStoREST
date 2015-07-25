@@ -22,6 +22,16 @@ describe('LMS API REST tests', function(){
 			});
 	});
 
+	it ('- GET state',function(done){
+		api()
+			.get('/state')
+			.expectStatus(200)
+			.end(function(err, res, body) {
+				if (err) throw err;
+				done();
+			});
+	});
+
 	it ('- POST new filter',function(done){
 		api()
 			.post('/create?entity=filter&id=1000&type=receiver&role=master')
@@ -44,10 +54,3 @@ describe('LMS API REST tests', function(){
 			});
 	});
 });
-//describe('LMS API REST to LMS TCP socket connectivity test', function(){
-
- // it(function(done){
- // ...
- // });
-
-//});

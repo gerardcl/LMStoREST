@@ -47,7 +47,6 @@ lmsSocket.sendSingleMessageAndReceive = function(port, host, message, callback) 
 };
 
 lmsSocket.prototype = {
-
     _onData: function(data) {
         data = data.toString();
         try {
@@ -119,7 +118,6 @@ lmsSocket.prototype = {
     isClosed: function() {
         return this._closed;
     }
-
 };
 
 var delegates = [

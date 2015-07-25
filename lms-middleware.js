@@ -15,12 +15,12 @@ var port     = process.env.PORT || 8080; // set our port
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//configure TCP socket
+// configure TCP socket
 //TODO to be configured through the API
 var socketPort     = 7777; // set our port
 var socketHost     = '127.0.0.1'; // set our port
 
-//configure DB
+// configure DB
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/lms-middleware');
 var Pipe     = require('./app/models/pipe');
@@ -69,34 +69,17 @@ router.get('/', function(req, res) {
 // on routes that end in /state
 // ----------------------------------------------------
 router.route('/state')
-	// get all the paths (accessed at GET http://localhost:8080/api/paths)
+	// get lms state (accessed at GET http://localhost:8080/api/state)
 	.get(function(req, res) {
-		var message = 
-		{ "events": 
-			["getState"] 
-		};
-		lmsSocket.sendSingleMessageAndReceive(socketPort, socketHost, 
-			message, 
-			function(err, message) {
-			    if (err) {
-			        //Something went wrong
-			    	res.json({ message: err });
-			    } else {
-				    if(message.error != null){
-					    	res.json({ message: message.error + ' Filter was not created'});
-				    } else {
-					    res.json({ message: 'New '+message});
-					}
-			}
+		lmsInterface.getState(socketHost, socketPort, function(response){
+			//TODO check response message - if ECONN reply with message like 500 instead of 200
+			res.json(response);
 		});
 	});
-
-
 
 // on routes that end in /create 
 // ----------------------------------------------------
 router.route('/create')
-
 	// create a filter, path or pipe entity (accessed at POST http://localhost:8080/create)
 	.post(function(req, res) {
 		if(req.query.entity){
@@ -108,14 +91,50 @@ router.route('/create')
 					});
 					break;
 				case 'path':
+					res.json({message: 'to be implemented'});
 					break;
 				case 'pipe':
+					res.json({message: 'to be implemented'});
 					break;
 				default:
+					res.json({message: 'can only create a filter, a path or a pipe!'});
 					break;
 			}
+		} else {
+			res.json({message: 'request query must indicate an entity (i.e.: filter, path or pipe)'});
 		}
 	})
+
+// on routes that end in /configure 
+// ----------------------------------------------------
+router.route('/configure')
+
+	// configure a filter type (accessed at POST http://localhost:8080/configure)
+	.post(function(req, res) {
+		if(req.query.type){
+			switch (req.query.type){
+				case 'videoEncoder':
+					lmsInterface.configureVideoEncoder(socketHost, socketPort, req.query, new Filter(), function(response){
+						//TODO check response message - if ECONN reply with message like 500 instead of 200
+						res.json(response);
+					});
+					break;
+				default:
+					res.json({message: 'can only configure a videoEncoder...!'});
+					break;
+			}
+		} else {
+			res.json({message: 'request query must indicate a filter type (i.e.: videoEncoder, ...)'});
+		}
+	})
+
+// on routes that end in /delete 
+// ----------------------------------------------------
+
+
+// on routes that end in /stop 
+// ----------------------------------------------------
+
 
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', router);
