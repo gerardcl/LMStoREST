@@ -1,6 +1,6 @@
 var net = require('net');
 
-var JsonSocket = function(socket) {
+var lmsSocket = function(socket) {
     this._socket = socket;
     this._buffer = '';
     this._closed = false;
@@ -8,11 +8,11 @@ var JsonSocket = function(socket) {
     socket.on('close', this._onClose.bind(this));
     socket.on('err', this._onError.bind(this));
 };
-module.exports = JsonSocket;
+module.exports = lmsSocket;
 
-JsonSocket.sendSingleMessage = function(port, host, message, callback) {
+lmsSocket.sendSingleMessage = function(port, host, message, callback) {
     callback = callback || function(){};
-    var socket = new JsonSocket(new net.Socket());
+    var socket = new lmsSocket(new net.Socket());
     socket.connect(port, host);
     socket.on('error', function(err) {
         callback(err);
@@ -22,9 +22,9 @@ JsonSocket.sendSingleMessage = function(port, host, message, callback) {
     });
 };
 
-JsonSocket.sendSingleMessageAndReceive = function(port, host, message, callback) {
+lmsSocket.sendSingleMessageAndReceive = function(port, host, message, callback) {
     callback = callback || function(){};
-    var socket = new JsonSocket(new net.Socket());
+    var socket = new lmsSocket(new net.Socket());
     socket.connect(port, host);
     socket.on('error', function(err) {
         callback(err);
@@ -46,7 +46,7 @@ JsonSocket.sendSingleMessageAndReceive = function(port, host, message, callback)
     });
 };
 
-JsonSocket.prototype = {
+lmsSocket.prototype = {
 
     _onData: function(data) {
         data = data.toString();
@@ -128,7 +128,7 @@ var delegates = [
     'end'
 ];
 delegates.forEach(function(method) {
-    JsonSocket.prototype[method] = function() {
+    lmsSocket.prototype[method] = function() {
         this._socket[method].apply(this._socket, arguments);
     }
 });
