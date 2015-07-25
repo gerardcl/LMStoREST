@@ -9,7 +9,6 @@ module.exports = lmsInterface;
 lmsInterface.createFilter = function(host, port, params, filter, callback) {
     callback = callback || function(){};
     //TODO: check if input params exist
-    var response = {};
     var message = 
     { "events": [
             {
@@ -31,7 +30,7 @@ lmsInterface.createFilter = function(host, port, params, filter, callback) {
                 callback({ message: err });
             } else {
                 if(message.error != null){
-                        callback({ message: message.error + ' Filter wasn\'t created'});
+                        callback({ message: message.error + ' Filter was not created'});
                 } else {
                     filter.id = params.id;
                     filter.type = params.type;

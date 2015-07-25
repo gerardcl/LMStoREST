@@ -83,7 +83,7 @@ router.route('/state')
 			    	res.json({ message: err });
 			    } else {
 				    if(message.error != null){
-					    	res.json({ message: message.error + ' Filter wasn\'t created'});
+					    	res.json({ message: message.error + ' Filter was not created'});
 				    } else {
 					    res.json({ message: 'New '+message});
 					}
@@ -103,6 +103,7 @@ router.route('/create')
 			switch (req.query.entity){
 				case 'filter':
 					lmsInterface.createFilter(socketHost, socketPort, req.query, new Filter(), function(response){
+						//TODO check response message - if ECONN reply with message like 500 instead of 200
 						res.json(response);
 					});
 					break;
