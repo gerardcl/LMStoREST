@@ -27,7 +27,7 @@ var express    		= require('express');
 var bodyParser 		= require('body-parser');
 var app        		= express();
 var morgan     	 	= require('morgan');
-var LMSInterface 	= require('./app/modules/lms-interface.js');
+var lmsInterface 	= require('./app/modules/lms-interface.js');
 
 // configure app
 app.use(morgan('dev')); // log requests to the console
@@ -38,10 +38,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // configure TCP socket
-//TODO to be configured through the API
+// TODO to be configured through the API
 var socketPort     	= 7777; 		// set our port
 var socketHost      = '127.0.0.1'; 	// set our port
-var lmsInterface 	= new LMSInterface(socketHost, socketPort); //connects a single interface to a single LMS instance
+var lmsInstance		= null;
 
 // ROUTES FOR LMS API REST
 // =============================================================================
@@ -60,15 +60,45 @@ router.get('/', function(req, res) {
 	res.json({ message: 'Hi! welcome to LMS API REST!' });	
 });
 
+// on routes that end in /connect
+// ----------------------------------------------------
+router.route('/connect')
+	// connect to LMS process and configure LMS instance (accessed at POST http://localhost:8080/api/connect)
+	.post(function(req, res) {
+		if (req.query.port && req.query.host){
+			if(!lmsInstance){
+				lmsInstance = new lmsInterface(req.query.host, req.query.port); 
+				lmsInstance.getState(function(response){
+					if(response.error){
+						console.log('Error connecting to LMS host '+lmsInstance._host+' and port ' + lmsInstance._port);
+						res.json({error: 'No LiveMediaStreamer running at host '+lmsInstance._host+' and port ' + lmsInstance._port});
+						lmsInstance = null;
+					} else {
+						console.log('LMS API REST connected to LMS host '+lmsInstance._host+' at port ' + lmsInstance._port);
+						res.json({message: 'LMS Middleware successfully configured to host '+lmsInstance._host+' and port ' + lmsInstance._port});
+					}
+				});
+			} else {
+				res.json({error: 'LMS instance already configured to host '+lmsInstance._host+' and port '+lmsInstance._port});
+			}
+		} else {
+			res.json({error: 'No host and port specified'});
+		}
+	});
+
 // on routes that end in /state
 // ----------------------------------------------------
 router.route('/state')
 	// get lms state (accessed at GET http://localhost:8080/api/state)
 	.get(function(req, res) {
-		lmsInterface.getState(function(response){
-			//TODO check response message - if ECONN reply with message like 500 instead of 200
-			res.json(response);
-		});
+		if(lmsInstance){
+			lmsInstance.getState(function(response){
+				//TODO check response message - if ECONN reply with message like 500 instead of 200
+				res.json(response);
+			});
+		} else {
+			res.json({error: 'Not connected to any LMS instance'});
+		}
 	});
 
 // on routes that end in /create 
@@ -76,39 +106,42 @@ router.route('/state')
 router.route('/create')
 	// create a filter, path or pipe entity (accessed at POST http://localhost:8080/create)
 	.post(function(req, res) {
-		if(req.query.entity){
-			switch (req.query.entity){
-				case 'filter':
-					lmsInterface.createFilter(req.query, function(response){
-						//TODO check response message - if ECONN reply with message like 500 instead of 200?
-						res.json(response);
-					});
-					break;
-				case 'path':
-					res.json({message: 'to be implemented'});
-					break;
-				case 'pipe':
-					res.json({message: 'to be implemented'});
-					break;
-				default:
-					res.json({message: 'can only create a filter, a path or a pipe!'});
-					break;
+		if(lmsInstance){
+			if(req.query.entity){
+				switch (req.query.entity){
+					case 'filter':
+						lmsInstance.createFilter(req.query, function(response){
+							//TODO check response message - if ECONN reply with message like 500 instead of 200?
+							res.json(response);
+						});
+						break;
+					case 'path':
+						res.json({message: 'to be implemented'});
+						break;
+					case 'pipe':
+						res.json({message: 'to be implemented'});
+						break;
+					default:
+						res.json({message: 'can only create a filter, a path or a pipe!'});
+						break;
+				}
+			} else {
+				res.json({message: 'request query must indicate an entity (i.e.: filter, path or pipe)'});
 			}
 		} else {
-			res.json({message: 'request query must indicate an entity (i.e.: filter, path or pipe)'});
+			res.json({error: 'Not connected to any LMS instance'});
 		}
 	})
 
 // on routes that end in /configure 
 // ----------------------------------------------------
 router.route('/configure')
-
 	// configure a filter type (accessed at POST http://localhost:8080/configure)
 	.post(function(req, res) {
 		if(req.query.type){
 			switch (req.query.type){
 				case 'videoEncoder':
-					lmsInterface.configureVideoEncoder(req.query, function(response){
+					lmsInstance.configureVideoEncoder(req.query, function(response){
 						//TODO check response message - if ECONN reply with message like 500 instead of 200
 						res.json(response);
 					});
@@ -137,4 +170,3 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('LMS API REST listening on port ' + port);
-console.log('LMS API REST connecting to LMS host '+lmsInterface._host+' at port ' + lmsInterface._port);

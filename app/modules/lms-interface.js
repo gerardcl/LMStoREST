@@ -28,35 +28,34 @@ mongoose.connect('mongodb://localhost:27017/lms-middleware');
 Pipe        = require('../models/pipe');
 Path        = require('../models/path');
 Filter      = require('../models/filter');
-console.log('Cleaning DB');
-
-//TODO implement a connectToLMSinstance method that checks connectivity and restarts or restores LMS state?
-Filter.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' filters cleaned');
-    }
-});
-Path.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' paths cleaned');
-    }
-});
-Pipe.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' pipes cleaned');
-    }
-});
 
 // the LiveMediaStreamer middleware interface
 var lmsInterface = function(host, port) {
     this._host = host;
     this._port = port;
+    //TODO implement a connectToLMSinstance method that checks connectivity and restarts or restores LMS state?
+    console.log('Cleaning DB');
+    Filter.remove(function(err, p){
+        if(err){ 
+            throw err;
+        } else{
+            console.log(p+' filters cleaned');
+        }
+    });
+    Path.remove(function(err, p){
+        if(err){ 
+            throw err;
+        } else{
+            console.log(p+' paths cleaned');
+        }
+    });
+    Pipe.remove(function(err, p){
+        if(err){ 
+            throw err;
+        } else{
+            console.log(p+' pipes cleaned');
+        }
+    });
 };
 
 module.exports = lmsInterface;

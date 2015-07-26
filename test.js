@@ -33,11 +33,11 @@ function api() {
 
 describe('LMS API REST tests', function(){
 
-	it ('- GET to root URI',function(done){
+	it ('- POST connect',function(done){
 		api()
-			.get('/')
+			.post('/connect?host=127.0.0.1&port=7777&')
 			.expectStatus(200)
-			.expectBody('{"message":"Hi! welcome to LMS API REST!"}')
+			.expectBody('{"message":"LMS Middleware successfully configured to host 127.0.0.1 and port 7777"}')
 			.end(function(err, res, body) {
 				if (err) throw err;
 				done();
