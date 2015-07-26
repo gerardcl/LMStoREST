@@ -69,7 +69,7 @@ describe('LMS API REST tests', function(){
 		api()
 			.post('/create?entity=filter&id=1000&type=receiver&role=master')
 			.expectStatus(200)
-			.expectBody('{"message":"Error registering filter. Specified ID already exists.. Filter was not created"}')
+			.expectBody('{"error":"Error registering filter. Specified ID already exists.. Filter was not created"}')
 			.end(function(err, res, body) {
 				if (err) throw err;
 				done();

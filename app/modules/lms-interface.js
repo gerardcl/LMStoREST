@@ -22,89 +22,110 @@
 
 var lmsSocket   = require('./lms-tcp-socket.js');
 
+// configure interface persistance DB 
+mongoose    = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/lms-middleware');
+Pipe        = require('../models/pipe');
+Path        = require('../models/path');
+Filter      = require('../models/filter');
+console.log('Cleaning DB');
+
+//TODO implement a connectToLMSinstance method that checks connectivity and restarts or restores LMS state?
+Filter.remove(function(err, p){
+    if(err){ 
+        throw err;
+    } else{
+        console.log(p+' filters cleaned');
+    }
+});
+Path.remove(function(err, p){
+    if(err){ 
+        throw err;
+    } else{
+        console.log(p+' paths cleaned');
+    }
+});
+Pipe.remove(function(err, p){
+    if(err){ 
+        throw err;
+    } else{
+        console.log(p+' pipes cleaned');
+    }
+});
+
+// the LiveMediaStreamer middleware interface
 var lmsInterface = function(host, port) {
     this._host = host;
     this._port = port;
 };
+
 module.exports = lmsInterface;
 
+lmsInterface.prototype = {
 // GET STATE
 // =============================================================================
-lmsInterface.getState = function(host, port, callback) {
-    callback = callback || function(){};
-    var message = {"events":[{"action":"getState","params":{}}]};
-    lmsSocket.sendSingleMessageAndReceive(port, host, 
-        message, 
-        function(err, message) {
-            if (err) {
-                //Something went wrong
-                callback({ error: err });
-            } else {
-                if(message.error != null){
-                        callback({ error: +' Could not get state: '+ message.error});
+    getState: function(callback) {
+        callback = callback || function(){};
+        var message = {"events":[{"action":"getState","params":{}}]};
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
                 } else {
-                    callback({message: message});
+                    if(message.error != null){
+                            callback({ error: +' Could not get state: '+ message.error});
+                    } else {
+                        callback({message: message});
+                    }
                 }
             }
-        }
-    );
-};
-
-// CREATE FILTER or PATH
+        );
+    },
+// CREATE FILTER
 // =============================================================================
-lmsInterface.createFilter = function(host, port, params, filter, callback) {
-    callback = callback || function(){};
-    //TODO: check if input params exist
-    var message = 
-    { "events": [
-            {
-                "action": 'createFilter',
-                "params": {
-                    "id": parseInt(params.id),
-                    "type": params.type,
-                    "role": params.role,
-                    "sharedFrames": true
-                }
-            } 
-        ] 
-    };
-    lmsSocket.sendSingleMessageAndReceive(port, host, 
-        message, 
-        function(err, message) {
-            if (err) {
-                //Something went wrong
-                callback({ error: err });
-            } else {
-                if(message.error != null){
-                        callback({ error: message.error + ' Filter was not created'});
+    createFilter: function(params, callback) {
+        callback = callback || function(){};
+        //TODO: check if input params exist
+        var message = 
+        { "events": [
+                {
+                    "action": 'createFilter',
+                    "params": {
+                        "id": parseInt(params.id),
+                        "type": params.type,
+                        "role": params.role,
+                        "sharedFrames": true
+                    }
+                } 
+            ] 
+        };
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
                 } else {
-                    filter.id = params.id;
-                    filter.type = params.type;
-                    filter.role = params.role;
-                    filter.sharedFrames = true;
-                    filter.save(function(err) {
-                        if (err){
-                            //TODO: maybe better destroy filter at LMS side?
-                            callback({ error: 'DB error!!! but ' +filter.type+ ' filter created with id ' + filter.id+'! Expect troubles...' });
-                        }
-                    });
-                    callback({ message: 'New ' +filter.type+ ' filter created with id ' + filter.id});
+                    if(message.error != null){
+                            callback({ error: message.error + ' Filter was not created'});
+                    } else {
+                        var filter  = new Filter();
+                        filter.id   = params.id;
+                        filter.type = params.type;
+                        filter.role = params.role;
+                        filter.sharedFrames = true;
+                        filter.save(function(err) {
+                            if (err){
+                                //TODO: maybe better destroy filter at LMS side?
+                                callback({ error: 'DB error!!! but ' +filter.type+ ' filter created with id ' + filter.id+'! Expect troubles...' });
+                            }
+                        });
+                        callback({ message: 'New ' +filter.type+ ' filter created with id ' + filter.id});
+                    }
                 }
             }
-        }
-    );
+        );
+    }
 };
-
-lmsInterface.createPath = function(port, host, message, callback) {
-    callback = callback || function(){};
-
-};
-
-
-lmsInterface.createPipe = function(port, host, message, callback) {
-    callback = callback || function(){};
-
-};
-
-// CONFIGURE FILTERS ()
-// =============================================================================

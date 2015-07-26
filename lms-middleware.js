@@ -26,12 +26,12 @@
 var express    		= require('express');
 var bodyParser 		= require('body-parser');
 var app        		= express();
-var morgan     		= require('morgan');
-var lmsInterface 	= require('./app/modules/lms-interface.js');
+var morgan     	 	= require('morgan');
+var LMSInterface 	= require('./app/modules/lms-interface.js');
 
 // configure app
 app.use(morgan('dev')); // log requests to the console
-var port     = process.env.PORT || 8080; // set our port
+var port = process.env.PORT || 8080; // set our port
 
 // configure body parser
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,37 +39,9 @@ app.use(bodyParser.json());
 
 // configure TCP socket
 //TODO to be configured through the API
-var socketPort     = 7777; // set our port
-var socketHost     = '127.0.0.1'; // set our port
-
-// configure DB
-var mongoose   = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/lms-middleware');
-var Pipe     = require('./app/models/pipe');
-var Path     = require('./app/models/path');
-var Filter     = require('./app/models/filter');
-console.log('Cleaning DB');
-Filter.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' filters cleaned');
-    }
-});
-Path.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' paths cleaned');
-    }
-});
-Pipe.remove(function(err, p){
-    if(err){ 
-        throw err;
-    } else{
-        console.log(p+' pipes cleaned');
-    }
-});
+var socketPort     	= 7777; 		// set our port
+var socketHost      = '127.0.0.1'; 	// set our port
+var lmsInterface 	= new LMSInterface(socketHost, socketPort); //connects a single interface to a single LMS instance
 
 // ROUTES FOR LMS API REST
 // =============================================================================
@@ -93,7 +65,7 @@ router.get('/', function(req, res) {
 router.route('/state')
 	// get lms state (accessed at GET http://localhost:8080/api/state)
 	.get(function(req, res) {
-		lmsInterface.getState(socketHost, socketPort, function(response){
+		lmsInterface.getState(function(response){
 			//TODO check response message - if ECONN reply with message like 500 instead of 200
 			res.json(response);
 		});
@@ -107,8 +79,8 @@ router.route('/create')
 		if(req.query.entity){
 			switch (req.query.entity){
 				case 'filter':
-					lmsInterface.createFilter(socketHost, socketPort, req.query, new Filter(), function(response){
-						//TODO check response message - if ECONN reply with message like 500 instead of 200
+					lmsInterface.createFilter(req.query, function(response){
+						//TODO check response message - if ECONN reply with message like 500 instead of 200?
 						res.json(response);
 					});
 					break;
@@ -136,7 +108,7 @@ router.route('/configure')
 		if(req.query.type){
 			switch (req.query.type){
 				case 'videoEncoder':
-					lmsInterface.configureVideoEncoder(socketHost, socketPort, req.query, new Filter(), function(response){
+					lmsInterface.configureVideoEncoder(req.query, function(response){
 						//TODO check response message - if ECONN reply with message like 500 instead of 200
 						res.json(response);
 					});
@@ -165,4 +137,4 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('LMS API REST listening on port ' + port);
-console.log('LMS API REST connecting to LMS host '+socketHost+' at port ' + socketPort);
+console.log('LMS API REST connecting to LMS host '+lmsInterface._host+' at port ' + lmsInterface._port);
