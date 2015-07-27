@@ -55,6 +55,7 @@ lmsInterface.prototype = {
             }
         );
     },
+// =============================================================================
 // DISCONNECT (AND STOP LMS)
 // =============================================================================
     disconnect: function(callback) {
@@ -76,11 +77,12 @@ lmsInterface.prototype = {
             }
         );
     },
+// =============================================================================
 // CREATE FILTER
 // =============================================================================
     createFilter: function(params, callback) {
-        callback = callback || function(){};
         //TODO: check if input params exist
+        callback = callback || function(){};
         var message = 
         { "events": [
                 {
@@ -105,11 +107,12 @@ lmsInterface.prototype = {
             }
         );
     },
+// =============================================================================
 // CREATE PATH
 // =============================================================================
-    createFilter: function(params, callback) {
-        callback = callback || function(){};
+    createPath: function(params, callback) {
         //TODO: check if input params exist
+        callback = callback || function(){};
         var message = 
         { "events": [
                 {
@@ -133,9 +136,36 @@ lmsInterface.prototype = {
                 }
             }
         );
-    }
+    },
+
 // =============================================================================
 // LMS FILTERS MANAGEMENT METHODS
 // =============================================================================
+// CONFIGURE FILTER
+// =============================================================================
+    configureFilter: function(filter_id, params, callback) {
+        //TODO: check if input params exist
+        callback = callback || function(){};
+        for(var i = 0; i < params.length; i++) {
+            params[i].filterId = parseInt(filter_id);
+        }
+        var message = 
+        { "events": params };
 
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
+                } else {
+                    if(message.error != null){
+                            callback({ error: message.error + ' Filter was not created'});
+                    } else {
+                        callback({ message: 'Filter with '+filter_id+' configured!'});
+                    }
+                }
+            }
+        );
+    }
 };

@@ -37,10 +37,7 @@ var port = process.env.PORT || 8080; // set our port
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// configure TCP socket
-// TODO to be configured through the API
-var socketPort     	= 7777; 		// set our port
-var socketHost      = '127.0.0.1'; 	// set our port
+// prepare lms Instance TCP socket
 var lmsInstance		= null;
 
 // ROUTES FOR LMS API REST
@@ -147,7 +144,7 @@ router.route('/createPath')
 	// create filter or path entity (accessed at POST http://localhost:8080/create)
 	.post(function(req, res) {
 		if(lmsInstance){
-			lmsInstance.createFilter(req.body, function(response){
+			lmsInstance.createPath(req.body, function(response){
 				if(response.error && response.error.code){
 					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
 					lmsInstance = null;
@@ -159,13 +156,19 @@ router.route('/createPath')
 			res.json({error: 'Not connected to any LMS instance'});
 		}
 	});
+	
+//TODO: implement delete filter and path methods
 
-// on routes that end in /configure 
+
 // ----------------------------------------------------
-router.route('/filter/:id')
+// API routes for Filter's management:
+// - getFilterState: returns specified filter state by its id
+// - configureFilter: configures any filter by specifying the id and bypassing body params
+// ----------------------------------------------------
+router.route('/filter/:filter_id')
 	// configure a filter type (accessed at POST http://localhost:8080/configure)
 	.get(function(req, res) {
-		lmsInstance.getFilterState(req.body, function(response){
+		lmsInstance.getFilterState(req.params.filter_id, function(response){
 			if(response.error && response.error.code){
 				res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
 				lmsInstance = null;
@@ -173,14 +176,25 @@ router.route('/filter/:id')
 				res.json(response);
 			}	
 		});
-	});
-
-// on routes that end in /delete 
-// ----------------------------------------------------
-
-
-// on routes that end in /stop 
-// ----------------------------------------------------
+	})
+	// update any filter. Assumes an array of input action objects or a single action object
+	// from the APP (then, the filterId param is added per action).
+	// the incoming array should be like:
+	// [{"action":"action1","params":{"foo":"bar"}},{"action":"action2","params":{"bar":"foo"}},...]
+	.put(function(req, res) {
+		if(lmsInstance){
+			lmsInstance.configureFilter(req.params.filter_id, req.body, function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}							
+			});
+		} else {
+			res.json({error: 'Not connected to any LMS instance'});
+		}
+	})
 
 
 // REGISTER OUR ROUTES -------------------------------
