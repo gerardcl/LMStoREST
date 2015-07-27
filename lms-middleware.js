@@ -60,14 +60,20 @@ router.get('/', function(req, res) {
 	res.json({ message: 'Hi! welcome to LMS API REST!' });	
 });
 
-// on routes that end in /connect
+// ----------------------------------------------------
+// API routes for Pipeline management:
+// - connect: checks LMS process connectivity (host and port required) and create lmsInstance
+// - disconnect: stops LMS process and destroys lmsInstance
+// - state: return global pipe state
+// - createFilter: creates a filter (id, type and role required)
+// - createPath: creates a path ()
 // ----------------------------------------------------
 router.route('/connect')
 	// connect to LMS process and configure LMS instance (accessed at POST http://localhost:8080/api/connect)
 	.post(function(req, res) {
-		if (req.query.port && req.query.host){
+		if (req.body.port && req.body.host){
 			if(!lmsInstance){
-				lmsInstance = new lmsInterface(req.query.host, req.query.port); 
+				lmsInstance = new lmsInterface(req.body.host, req.body.port); 
 				lmsInstance.getState(function(response){
 					if(response.error){
 						console.log('Error connecting to LMS host '+lmsInstance._host+' and port ' + lmsInstance._port);
@@ -86,15 +92,30 @@ router.route('/connect')
 		}
 	});
 
-// on routes that end in /state
-// ----------------------------------------------------
+router.route('/disconnect')
+	// disconnect from LMS process and destroy LMS instance (accessed at GET http://localhost:8080/api/disconnect)
+	.get(function(req, res) {
+		if(lmsInstance){
+			lmsInstance.disconnect(function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+				} else {
+					res.json(response);
+				}	
+				lmsInstance = null;
+			});
+		} else {
+			res.json({error: 'Already disconnected from LMS'});
+		}
+	});
+
 router.route('/state')
 	// get lms state (accessed at GET http://localhost:8080/api/state)
 	.get(function(req, res) {
 		if(lmsInstance){
 			lmsInstance.getState(function(response){
 				if(response.error && response.error.code){
-					res.json({error: 'Connection refused. Check LMS connectivity and connect again.'});
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
 					lmsInstance = null;
 				} else {
 					res.json(response);
@@ -105,64 +126,54 @@ router.route('/state')
 		}
 	});
 
-// on routes that end in /create 
-// ----------------------------------------------------
-router.route('/create')
-	// create a filter, path or pipe entity (accessed at POST http://localhost:8080/create)
+router.route('/createFilter')
+	// create filter or path entity (accessed at POST http://localhost:8080/create)
 	.post(function(req, res) {
 		if(lmsInstance){
-			if(req.query.entity){
-				switch (req.query.entity){
-					case 'filter':
-						//TODO check required input params!
-						lmsInstance.createFilter(req.query, function(response){
-							if(response.error && response.error.code){
-								res.json({error: 'Connection refused. Check LMS connectivity and connect again.'});
-								lmsInstance = null;
-							} else {
-								res.json(response);
-							}							
-						});
-						break;
-					case 'path':
-						res.json({message: 'to be implemented'});
-						break;
-					case 'pipe':
-						res.json({message: 'to be implemented'});
-						break;
-					default:
-						res.json({message: 'can only create a filter, a path or a pipe!'});
-						break;
-				}
-			} else {
-				res.json({message: 'request query must indicate an entity (i.e.: filter, path or pipe)'});
-			}
+			lmsInstance.createFilter(req.body, function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}							
+			});
 		} else {
 			res.json({error: 'Not connected to any LMS instance'});
 		}
-	})
+	});
+
+router.route('/createPath')
+	// create filter or path entity (accessed at POST http://localhost:8080/create)
+	.post(function(req, res) {
+		if(lmsInstance){
+			lmsInstance.createFilter(req.body, function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}							
+			});
+		} else {
+			res.json({error: 'Not connected to any LMS instance'});
+		}
+	});
 
 // on routes that end in /configure 
 // ----------------------------------------------------
-router.route('/configure')
+router.route('/filter/:id')
 	// configure a filter type (accessed at POST http://localhost:8080/configure)
-	.post(function(req, res) {
-		if(req.query.type){
-			switch (req.query.type){
-				case 'videoEncoder':
-					lmsInstance.configureVideoEncoder(req.query, function(response){
-						//TODO check response message - if ECONN reply with message like 500 instead of 200
-						res.json(response);
-					});
-					break;
-				default:
-					res.json({message: 'can only configure a videoEncoder...!'});
-					break;
-			}
-		} else {
-			res.json({message: 'request query must indicate a filter type (i.e.: videoEncoder, ...)'});
-		}
-	})
+	.get(function(req, res) {
+		lmsInstance.getFilterState(req.body, function(response){
+			if(response.error && response.error.code){
+				res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+				lmsInstance = null;
+			} else {
+				res.json(response);
+			}	
+		});
+	});
 
 // on routes that end in /delete 
 // ----------------------------------------------------

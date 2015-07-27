@@ -31,6 +31,9 @@ var lmsInterface = function(host, port) {
 module.exports = lmsInterface;
 
 lmsInterface.prototype = {
+// =============================================================================
+// LMS PIPELINE MANAGEMENT METHODS
+// =============================================================================
 // GET STATE
 // =============================================================================
     getState: function(callback) {
@@ -52,6 +55,27 @@ lmsInterface.prototype = {
             }
         );
     },
+// DISCONNECT (AND STOP LMS)
+// =============================================================================
+    disconnect: function(callback) {
+        callback = callback || function(){};
+        var message = {"events":[{"action":"stop","params":{}}]};
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
+                } else {
+                    if(message.error != null){
+                            callback({ error: +' Could not disconnect: '+ message.error});
+                    } else {
+                        callback({message: message});
+                    }
+                }
+            }
+        );
+    },
 // CREATE FILTER
 // =============================================================================
     createFilter: function(params, callback) {
@@ -61,12 +85,36 @@ lmsInterface.prototype = {
         { "events": [
                 {
                     "action": 'createFilter',
-                    "params": {
-                        "id": parseInt(params.id),
-                        "type": params.type,
-                        "role": params.role,
-                        "sharedFrames": true
+                    "params": params
+                } 
+            ] 
+        };
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
+                } else {
+                    if(message.error != null){
+                            callback({ error: message.error + ' Filter was not created'});
+                    } else {
+                        callback({ message: 'New ' +params.type+ ' filter created with id ' + params.id});
                     }
+                }
+            }
+        );
+    },
+// CREATE PATH
+// =============================================================================
+    createFilter: function(params, callback) {
+        callback = callback || function(){};
+        //TODO: check if input params exist
+        var message = 
+        { "events": [
+                {
+                    "action": 'createFilter',
+                    "params": params
                 } 
             ] 
         };
@@ -86,4 +134,8 @@ lmsInterface.prototype = {
             }
         );
     }
+// =============================================================================
+// LMS FILTERS MANAGEMENT METHODS
+// =============================================================================
+
 };
