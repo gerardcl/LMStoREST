@@ -5,7 +5,7 @@ Installation and usage
 
 - clone the git repository
 
-- before using the middleware it is required to install nodejs, npm and mongodb (e.g.: apt-get install npm mongodb)
+- before using the middleware it is required to install LiveMediaStreamer framwork, nodejs and npm (e.g.: apt-get install npm)
 
 - enter to the LMStoREST directory
 
