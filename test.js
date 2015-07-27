@@ -37,7 +37,7 @@ describe('LMS API REST tests', function(){
 		api()
 			.post('/connect?host=127.0.0.1&port=7777&')
 			.expectStatus(200)
-			.expectBody('{"message":"LMS Middleware successfully configured to host 127.0.0.1 and port 7777"}')
+			.expectBody('{"message":"LMS middleware successfully configured to host 127.0.0.1 and port 7777"}')
 			.end(function(err, res, body) {
 				if (err) throw err;
 				done();

@@ -72,14 +72,14 @@ router.route('/connect')
 					if(response.error){
 						console.log('Error connecting to LMS host '+lmsInstance._host+' and port ' + lmsInstance._port);
 						res.json({error: 'No LiveMediaStreamer running at host '+lmsInstance._host+' and port ' + lmsInstance._port});
-						lmsInstance = null;
+						delete lmsInstance;
 					} else {
-						console.log('LMS API REST connected to LMS host '+lmsInstance._host+' at port ' + lmsInstance._port);
-						res.json({message: 'LMS Middleware successfully configured to host '+lmsInstance._host+' and port ' + lmsInstance._port});
+						console.log('LMS middleware connected to LMS host '+lmsInstance._host+' at port ' + lmsInstance._port);
+						res.json({message: 'LMS middleware successfully configured to host '+lmsInstance._host+' and port ' + lmsInstance._port});
 					}
 				});
 			} else {
-				res.json({error: 'LMS instance already configured to host '+lmsInstance._host+' and port '+lmsInstance._port});
+				res.json({error: 'LMS middleware already configured to host '+lmsInstance._host+' and port '+lmsInstance._port});
 			}
 		} else {
 			res.json({error: 'No host and port specified'});
@@ -110,6 +110,7 @@ router.route('/create')
 			if(req.query.entity){
 				switch (req.query.entity){
 					case 'filter':
+						//TODO check required input params!
 						lmsInstance.createFilter(req.query, function(response){
 							//TODO check response message - if ECONN reply with message like 500 instead of 200?
 							res.json(response);

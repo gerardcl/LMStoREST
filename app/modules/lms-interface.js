@@ -22,40 +22,10 @@
 
 var lmsSocket   = require('./lms-tcp-socket.js');
 
-// configure interface persistance DB 
-mongoose    = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/lms-middleware');
-Pipe        = require('../models/pipe');
-Path        = require('../models/path');
-Filter      = require('../models/filter');
-
 // the LiveMediaStreamer middleware interface
 var lmsInterface = function(host, port) {
     this._host = host;
     this._port = port;
-    //TODO implement a connectToLMSinstance method that checks connectivity and restarts or restores LMS state?
-    console.log('Cleaning DB');
-    Filter.remove(function(err, p){
-        if(err){ 
-            throw err;
-        } else{
-            console.log(p+' filters cleaned');
-        }
-    });
-    Path.remove(function(err, p){
-        if(err){ 
-            throw err;
-        } else{
-            console.log(p+' paths cleaned');
-        }
-    });
-    Pipe.remove(function(err, p){
-        if(err){ 
-            throw err;
-        } else{
-            console.log(p+' pipes cleaned');
-        }
-    });
 };
 
 module.exports = lmsInterface;
@@ -110,18 +80,8 @@ lmsInterface.prototype = {
                     if(message.error != null){
                             callback({ error: message.error + ' Filter was not created'});
                     } else {
-                        var filter  = new Filter();
-                        filter.id   = params.id;
-                        filter.type = params.type;
-                        filter.role = params.role;
-                        filter.sharedFrames = true;
-                        filter.save(function(err) {
-                            if (err){
-                                //TODO: maybe better destroy filter at LMS side?
-                                callback({ error: 'DB error!!! but ' +filter.type+ ' filter created with id ' + filter.id+'! Expect troubles...' });
-                            }
-                        });
-                        callback({ message: 'New ' +filter.type+ ' filter created with id ' + filter.id});
+                        console.log('New ' +params.type+ ' filter created with id ' + params.id);
+                        callback({ message: 'New ' +params.type+ ' filter created with id ' + params.id});
                     }
                 }
             }
