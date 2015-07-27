@@ -80,7 +80,6 @@ lmsInterface.prototype = {
                     if(message.error != null){
                             callback({ error: message.error + ' Filter was not created'});
                     } else {
-                        console.log('New ' +params.type+ ' filter created with id ' + params.id);
                         callback({ message: 'New ' +params.type+ ' filter created with id ' + params.id});
                     }
                 }

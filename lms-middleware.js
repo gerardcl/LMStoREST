@@ -72,7 +72,7 @@ router.route('/connect')
 					if(response.error){
 						console.log('Error connecting to LMS host '+lmsInstance._host+' and port ' + lmsInstance._port);
 						res.json({error: 'No LiveMediaStreamer running at host '+lmsInstance._host+' and port ' + lmsInstance._port});
-						delete lmsInstance;
+						lmsInstance = null;
 					} else {
 						console.log('LMS middleware connected to LMS host '+lmsInstance._host+' at port ' + lmsInstance._port);
 						res.json({message: 'LMS middleware successfully configured to host '+lmsInstance._host+' and port ' + lmsInstance._port});
@@ -93,8 +93,12 @@ router.route('/state')
 	.get(function(req, res) {
 		if(lmsInstance){
 			lmsInstance.getState(function(response){
-				//TODO check response message - if ECONN reply with message like 500 instead of 200
-				res.json(response);
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused. Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}	
 			});
 		} else {
 			res.json({error: 'Not connected to any LMS instance'});
@@ -112,8 +116,12 @@ router.route('/create')
 					case 'filter':
 						//TODO check required input params!
 						lmsInstance.createFilter(req.query, function(response){
-							//TODO check response message - if ECONN reply with message like 500 instead of 200?
-							res.json(response);
+							if(response.error && response.error.code){
+								res.json({error: 'Connection refused. Check LMS connectivity and connect again.'});
+								lmsInstance = null;
+							} else {
+								res.json(response);
+							}							
 						});
 						break;
 					case 'path':
