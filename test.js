@@ -20,59 +20,43 @@
 //  Authors:  Gerard Castillo <gerard.castillo@i2cat.net>
 // 
 
-var expect = require('chai').expect;
-var hippie = require('hippie');
+var request = require('supertest');
+var uri = "http://localhost:8080/api";
 
 console.log("NOTE: Remember running whole platform before executing tests over it \n - run \'livemediastreamer <port>\' \n - run \'npm start\'");
 
-function api() {
-  return hippie()
-    .json()
-	.base('http://localhost:8080/api')
-}
 
 describe('LMS API REST tests', function(){
-
 	it ('- POST connect',function(done){
-		api()
-			.post('/connect?host=127.0.0.1&port=7777&')
-			.expectStatus(200)
-			.expectBody('{"message":"LMS middleware successfully configured to host 127.0.0.1 and port 7777"}')
-			.end(function(err, res, body) {
-				if (err) throw err;
-				done();
-			});
+	    var message = { port : 7777, host : '127.0.0.1'};
+	    request(uri)
+	      .post("/connect")
+	      .send(message)
+	      .expect(200)
+	      .expect({"message":"LMS middleware successfully configured to host 127.0.0.1 and port 7777"}, done);	
 	});
 
 	it ('- GET state',function(done){
-		api()
-			.get('/state')
-			.expectStatus(200)
-			.end(function(err, res, body) {
-				if (err) throw err;
-				done();
-			});
+	    request(uri)
+	      .get("/state")
+	      .expect(200, done)
 	});
 
 	it ('- POST new filter',function(done){
-		api()
-			.post('/create?entity=filter&id=1000&type=receiver&role=master')
-			.expectStatus(200)
-			.expectBody('{"message":"New receiver filter created with id 1000"}')
-			.end(function(err, res, body) {
-				if (err) throw err;
-				done();
-			});
+	    var message = { id : 1, type : 'receiver', role: 'master', sharedFrames: true};
+	    request(uri)
+	      .post("/createFilter")
+	      .send(message)
+	      .expect(200)
+	      .expect({"message":"New receiver filter created with id 1"}, done);	  	
 	});
 
 	it ('- POST existing filter',function(done){
-		api()
-			.post('/create?entity=filter&id=1000&type=receiver&role=master')
-			.expectStatus(200)
-			.expectBody('{"error":"Error registering filter. Specified ID already exists.. Filter was not created"}')
-			.end(function(err, res, body) {
-				if (err) throw err;
-				done();
-			});
+	    var message = { id : 1, type : 'receiver', role: 'master', sharedFrames: true};
+	    request(uri)
+	      .post("/createFilter")
+	      .send(message)
+	      .expect(200)
+	      .expect({"error":"Error registering filter. Specified ID already exists.. Filter was not created"}, done);	  	
 	});
 });

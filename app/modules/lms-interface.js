@@ -70,7 +70,7 @@ lmsInterface.prototype = {
                     if(message.error != null){
                             callback({ error: +' Could not disconnect: '+ message.error});
                     } else {
-                        callback({message: message});
+                        callback({message: 'LiveMediaStreamer instance stopped and cleaned successfully'});
                     }
                 }
             }

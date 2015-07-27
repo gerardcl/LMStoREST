@@ -1,24 +1,23 @@
 {
-    "name": "lms-api-middleware",
-    "main": "lms-middleware.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ua-i2cat/LMStoREST"
-    },
-    "scripts": {
-        "start": "node lms-middleware.js",
-        "test": "./node_modules/.bin/mocha test.js -R spec"
-    },
-    "author": "Gerard CL <gerard.castillo@i2cat.net>",
-    "license": "GPL",
-    "dependencies": {
-        "express": "4.0.0",
-        "morgan": "1.0.0",
-        "body-parser": "1.0.1"
-    },
-    "devDependencies": {
-        "mocha": "2.2.5",
-        "chai": "3.2.0",
-        "hippie": "0.3.0"
-    }
+  "name": "lms-api-middleware",
+  "main": "lms-middleware.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ua-i2cat/LMStoREST"
+  },
+  "scripts": {
+    "start": "node lms-middleware.js",
+    "test": "./node_modules/.bin/mocha test.js -R spec"
+  },
+  "author": "Gerard CL <gerard.castillo@i2cat.net>",
+  "license": "GPL",
+  "dependencies": {
+    "express": "4.0.0",
+    "morgan": "1.0.0",
+    "body-parser": "1.0.1"
+  },
+  "devDependencies": {
+    "mocha": "2.2.5",
+    "supertest": "~1.0.1"
+  }
 }
