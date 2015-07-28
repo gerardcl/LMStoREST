@@ -59,4 +59,20 @@ describe('LMS API REST tests', function(){
 	      .expect(200)
 	      .expect({"error":"Error registering filter. Specified ID already exists.. Filter was not created"}, done);	  	
 	});
+
+	it ('- GET disconnect',function(done){
+	    request(uri)
+	      .get("/disconnect")
+	      .expect(200)
+	      .expect({"message":"Successfully disconnected from LMS instance (127.0.0.1:7777)"}, done);	  	
+	});
+
+	it ('- GET state when disconnected',function(done){
+	    request(uri)
+	      .get("/state")
+	      .expect(200)
+	      .expect({ error: 'Not connected to any LMS instance' }, done);	  	
+	});
 });
+
+
