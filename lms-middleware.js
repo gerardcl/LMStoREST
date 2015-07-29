@@ -33,9 +33,14 @@ var lmsInterface 	= require('./app/modules/lms-interface.js');
 app.use(morgan('dev')); // log requests to the console
 var port = process.env.PORT || 8080; // set our port
 
-// configure body parser
+// configure body parser and CORS middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 // prepare lms Instance TCP socket
 var lmsInstance		= null;
