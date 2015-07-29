@@ -180,7 +180,7 @@ router.route('/filter/:filter_id')
 	// update any filter. Assumes an array of input action objects or a single action object
 	// from the APP (then, the filterId param is added per action).
 	// the incoming array should be like:
-	// [{"action":"action1","params":{"foo":"bar"}},{"action":"action2","params":{"bar":"foo"}},...]
+	// [{"action":"action1","delay":30,"params":{"foo":"bar"}},{"action":"action2","params":{"bar":"foo"}},...]
 	.put(function(req, res) {
 		if(lmsInstance){
 			lmsInstance.configureFilter(req.params.filter_id, req.body, function(response){
