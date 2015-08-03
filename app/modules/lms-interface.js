@@ -116,7 +116,7 @@ lmsInterface.prototype = {
         var message = 
         { "events": [
                 {
-                    "action": 'createFilter',
+                    "action": 'createPath',
                     "params": params
                 } 
             ] 
@@ -129,9 +129,9 @@ lmsInterface.prototype = {
                     callback({ error: err });
                 } else {
                     if(message.error != null){
-                            callback({ error: message.error + ' Filter was not created'});
+                            callback({ error: message.error + ' Path was not created'});
                     } else {
-                        callback({ message: 'New ' +params.type+ ' filter created with id ' + params.id});
+                        callback({ message: 'New path created'});
                     }
                 }
             }
