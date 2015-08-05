@@ -103,7 +103,11 @@ router.route('/disconnect')
 				if(response.error && response.error.code){
 					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
 				} else {
-					res.json({message: 'Successfully disconnected from LMS instance ('+lmsInstance._host+':'+lmsInstance._port+')'});
+					if(response.error){
+						res.json(response);
+					} else {
+						res.json({message: 'Successfully disconnected from LMS instance ('+lmsInstance._host+':'+lmsInstance._port+')'});
+					}
 				}	
 				lmsInstance = null;
 			});
