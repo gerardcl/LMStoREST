@@ -30,11 +30,26 @@ Also, to install [liveMediaStreamer framework](https://github.com/ua-i2cat/liveM
 
     ./livemediastreamer <lms-port>
     
-Once LMS is running and listening on *lms-port* follow the API REST methods to configure and play with it.
+Once LMS is running and listening on *lms-port* just play with the API REST methods.
 
 ##API REST methods
 
-**Connect**
+Sent and received messages are JSON objects. Per each method the message to sent is specified next (if a message is required). The received messages always has the following structure when:
+
+**Succes**
+
+    JSON    {
+                "message": { the incoming message could be a string, bool, array or another object, depending on the method }
+            }
+
+**Error**
+
+    JSON    {
+                "error": "the error message"
+            }
+
+
+####Connect
 Checks if an existing instance of LMS is running and sets the lms-port and lms-host to work with.
 
     POST http://localhost:8080/api/connect
@@ -43,12 +58,75 @@ Checks if an existing instance of LMS is running and sets the lms-port and lms-h
                 "host":"lms-host"
             }
 
-**Disconnect**
+####Disconnect
+
 Reset the LMS instance running and sets lms-port and lms-host to null in order to connect again to the same or another LMS instance.
 
     GET http://localhost:8080/api/disconnect
 
-**State**
+####State
 Gets the state object of the current LMS instance connected to (the configured filters and paths).
 
     GET http://localhost:8080/api/state
+
+####Create a filter
+Creates a filter (current types are: receiver, transmitter, demuxer, dasher, audioDecoder, audioEncoder, videoDecoder, videoResampler, videoEncoder, audioMixer, videoMixer)
+
+    POST http://localhost:8080/api/createFilter
+    JSON    {
+                "id": filterID,
+                "type": "type"
+            }
+
+####Configure an existing filter
+Configures an existing filter (each filter has its own actions defined, check the LiveMediaStreamer wiki to know them)
+
+    PUT http://localhost:8080/api/filter/:filterID
+    JSON    [
+                {
+                    "action":"the action",
+                        "params":{
+                            "param1":param1,
+                            "param2":"param2",
+                            "param3":"param3",
+                            "param4":true
+                    }
+                },
+                {
+                    "action":"another action",
+                        "params":{
+                            "param1":param1,
+                            "param2":"param2",
+                            "param3":"param3",
+                            "param4":true
+                    }
+                },
+                ...
+            ]
+
+####Create a path of filters
+Create a path of filters. A path can be a master path or an slave one, as shown:
+
+**Master path**
+
+    POST http://localhost:8080/api/createPath
+    JSON    { 
+                'id' : pathId, 
+                'orgFilterId' : orgFilterId, 
+                'dstFilterId' : dstFilterId, 
+                'orgWriterId' : orgWriterId, 
+                'dstReaderId' : dstReaderId, 
+                'midFiltersIds' : [filterID1, filterID2,...] 
+            }
+                
+**Slave path**
+
+    POST http://localhost:8080/api/createPath
+    JSON    { 
+                'id' : pathId, 
+                'orgFilterId' : orgFilterId, 
+                'dstFilterId' : dstFilterId, 
+                'orgWriterId' : -1, 
+                'dstReaderId' : dstReaderId, 
+                'midFiltersIds' : [filterID1, filterID2,...] 
+            }
