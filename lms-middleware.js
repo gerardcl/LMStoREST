@@ -32,6 +32,8 @@ var lmsInterface 	= require('./app/modules/lms-interface.js');
 // configure app
 app.use(morgan('dev')); // log requests to the console
 var port = process.env.PORT || 8080; // set our port
+var lms_host = process.env.LMS_HOST; // set our LMS host to connect to
+var lms_port = process.env.LMS_PORT; // set our LMS port to connect to
 
 // configure body parser and CORS middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -74,9 +76,12 @@ router.get('/', function(req, res) {
 router.route('/connect')
 	// connect to LMS process and configure LMS instance (accessed at POST http://localhost:8080/api/connect)
 	.post(function(req, res) {
-		if (req.body.port && req.body.host){
-			if(!lmsInstance){
-				lmsInstance = new lmsInterface(req.body.host, req.body.port); 
+		if(!lmsInstance){
+			if (req.body.port && req.body.host) {
+				lms_host = req.body.host;
+				lms_port = req.body.port;
+			} else if (lms_port && lms_host) {
+				lmsInstance = new lmsInterface(lms_host, lms_port); 
 				lmsInstance.getState(function(response){
 					if(response.error){
 						console.log('Error connecting to LMS host '+lmsInstance._host+' and port ' + lmsInstance._port);
@@ -88,12 +93,14 @@ router.route('/connect')
 					}
 				});
 			} else {
-				res.json({error: 'LMS middleware already configured to host '+lmsInstance._host+' and port '+lmsInstance._port});
+				res.json({error: 'No host and port specified'});
 			}
 		} else {
-			res.json({error: 'No host and port specified'});
+			res.json({error: 'LMS middleware already configured to host '+lmsInstance._host+' and port '+lmsInstance._port});
 		}
 	});
+
+
 
 router.route('/disconnect')
 	// disconnect from LMS process and destroy LMS instance (accessed at GET http://localhost:8080/api/disconnect)
@@ -134,7 +141,7 @@ router.route('/state')
 	});
 
 router.route('/createFilter')
-	// create filter or path entity (accessed at POST http://localhost:8080/create)
+	// create filter or path entity (accessed at POST http://localhost:8080/api/createFilter)
 	.post(function(req, res) {
 		if(lmsInstance){
 			lmsInstance.createFilter(req.body, function(response){
@@ -151,7 +158,7 @@ router.route('/createFilter')
 	});
 
 router.route('/createPath')
-	// create filter or path entity (accessed at POST http://localhost:8080/create)
+	// create filter or path entity (accessed at POST http://localhost:8080/api/createPath)
 	.post(function(req, res) {
 		if(lmsInstance){
 			lmsInstance.createPath(req.body, function(response){
@@ -176,7 +183,7 @@ router.route('/createPath')
 // - configureFilter: configures any filter by specifying the id and bypassing body params
 // ----------------------------------------------------
 router.route('/filter/:filter_id')
-	// configure a filter type (accessed at POST http://localhost:8080/configure)
+	// gets a filter status (accessed at GET http://localhost:8080/api/filter/:filter_id)
 	.get(function(req, res) {
 		lmsInstance.getFilterState(req.params.filter_id, function(response){
 			if(response.error && response.error.code){
@@ -187,6 +194,7 @@ router.route('/filter/:filter_id')
 			}	
 		});
 	})
+	// updates a filter (accessed at PUT http://localhost:8080/api/filter/:filter_id)
 	// update any filter. Assumes an array of input action objects or a single action object
 	// from the APP (then, the filterId param is added per action).
 	// the incoming array should be like:
