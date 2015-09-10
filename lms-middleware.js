@@ -80,7 +80,8 @@ router.route('/connect')
 			if (req.body.port && req.body.host) {
 				lms_host = req.body.host;
 				lms_port = req.body.port;
-			} else if (lms_port && lms_host) {
+			}
+			if (lms_port && lms_host) {
 				lmsInstance = new lmsInterface(lms_host, lms_port); 
 				lmsInstance.getState(function(response){
 					if(response.error){
