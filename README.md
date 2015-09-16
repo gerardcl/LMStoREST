@@ -119,14 +119,4 @@ Create a path of filters. A path can be a master path or an slave one, as shown:
                 'midFiltersIds' : [filterID1, filterID2,...] 
             }
                 
-**Slave path**
 
-    POST http://localhost:8080/api/createPath
-    JSON    { 
-                'id' : pathId, 
-                'orgFilterId' : orgFilterId, 
-                'dstFilterId' : dstFilterId, 
-                'orgWriterId' : -1, 
-                'dstReaderId' : dstReaderId, 
-                'midFiltersIds' : [filterID1, filterID2,...] 
-            }
