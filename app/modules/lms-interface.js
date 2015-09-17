@@ -99,7 +99,7 @@ lmsInterface.prototype = {
                     callback({ error: err });
                 } else {
                     if(message.error != null){
-                            callback({ error: message.error + ' Filter was not created'});
+                            callback({ error: +' Filter was not created: '+ message.error });
                     } else {
                         callback({ message: 'New ' +params.type+ ' filter created with id ' + params.id});
                     }
@@ -129,7 +129,7 @@ lmsInterface.prototype = {
                     callback({ error: err });
                 } else {
                     if(message.error != null){
-                            callback({ error: message.error + ' Path was not created'});
+                            callback({ error:+ ' Path was not created: '+ message.error });
                     } else {
                         callback({ message: 'New path created'});
                     }
@@ -160,12 +160,45 @@ lmsInterface.prototype = {
                     callback({ error: err });
                 } else {
                     if(message.error != null){
-                            callback({ error: message.error + ' Filter was not created'});
+                            callback({ error: + ' Filter was not configured: '+ message.error });
                     } else {
                         callback({ message: 'Filter with '+filter_id+' configured!'});
                     }
                 }
             }
         );
+    },
+
+// =============================================================================
+// LMS PATH MANAGEMENT METHOD
+// =============================================================================
+// DELETE PATH
+// =============================================================================
+    deletePath: function(path_id, callback) {
+        callback = callback || function(){};
+        message = { "events": [
+                {
+                    "action": 'removePath',
+                    "params": { "id" : parseInt(path_id) }
+                } 
+            ] 
+        };
+
+        lmsSocket.sendSingleMessageAndReceive(this._port, this._host, 
+            message, 
+            function(err, message) {
+                if (err) {
+                    //Something went wrong
+                    callback({ error: err });
+                } else {
+                    if(message.error != null){
+                            callback({ error: +' Path was not deleted: '+ message.error });
+                    } else {
+                        callback({ message: 'Path '+path_id+' successfully deleted'});
+                    }
+                }
+            }
+        );
     }
+
 };

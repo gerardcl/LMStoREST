@@ -186,14 +186,18 @@ router.route('/createPath')
 router.route('/filter/:filter_id')
 	// gets a filter status (accessed at GET http://localhost:8080/api/filter/:filter_id)
 	.get(function(req, res) {
-		lmsInstance.getFilterState(req.params.filter_id, function(response){
-			if(response.error && response.error.code){
-				res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
-				lmsInstance = null;
-			} else {
-				res.json(response);
-			}	
-		});
+		if(lmsInstance){
+			lmsInstance.getFilterState(req.params.filter_id, function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}	
+			});
+		} else {
+			res.json({error: 'Not connected to any LMS instance'});
+		}	
 	})
 	// updates a filter (accessed at PUT http://localhost:8080/api/filter/:filter_id)
 	// update any filter. Assumes an array of input action objects or a single action object
@@ -208,12 +212,33 @@ router.route('/filter/:filter_id')
 					lmsInstance = null;
 				} else {
 					res.json(response);
-				}							
+				}						
 			});
 		} else {
 			res.json({error: 'Not connected to any LMS instance'});
 		}
-	})
+	});
+
+// ----------------------------------------------------
+// API routes for Path's management:
+// - deletePath: delete specified path by its id
+// ----------------------------------------------------
+router.route('/path/:path_id')
+	// delete a path (accessed at DELETE http://localhost:8080/api/path/:path_id)
+	.delete(function(req, res) {
+		if(lmsInstance){
+			lmsInstance.deletePath(req.params.path_id, function(response){
+				if(response.error && response.error.code){
+					res.json({error: 'Connection refused ('+response.error.code+'). Check LMS connectivity and connect again.'});
+					lmsInstance = null;
+				} else {
+					res.json(response);
+				}	
+			});
+		} else {
+			res.json({error: 'Not connected to any LMS instance'});
+		}			
+	});
 
 
 // REGISTER OUR ROUTES -------------------------------
